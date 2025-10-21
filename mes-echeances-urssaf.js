@@ -78,10 +78,8 @@ async function login({ identifiant, password }) {
     redirect: "manual",
   });
 
-  const cookies = res.headers
-    .getSetCookie()
-    .map((c) => c.split(";")[0].split("="));
-  const ctxValue = cookies.find(([n]) => n === "ctxUrssaf")?.[1];
+  const cookieMap = new Bun.CookieMap(res.headers.getSetCookie().join("; "));
+  const ctxValue = cookieMap.get("ctxUrssaf");
   const { compte } = JSON.parse(
     Buffer.from(decodeURIComponent(ctxValue), "base64").toString(),
   );
@@ -120,10 +118,7 @@ async function login({ identifiant, password }) {
       subject_token_type: "urn:oauth2:180035016:acoss:token-bds",
     })}`,
     {
-      headers: {
-        ...headers,
-        Cookie: cookies.map(([n, v]) => `${n}=${v}`).join("; "),
-      },
+      headers,
       redirect: "manual",
     },
   );
